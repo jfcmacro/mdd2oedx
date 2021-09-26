@@ -1,2 +1,4 @@
 # mdd2oedx
-Take an md file with a description and produces a course into open Edx
+
+Take a md file with a course's description and generates a corresponding course using Open Edx structure.
+
