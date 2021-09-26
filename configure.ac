@@ -1,10 +1,25 @@
-AC_INIT(src/main.cpp)
+AC_INIT([mdd2oedx],[0.1.0],[jfcmacro@gmail.com])
 
-PACKAGE=mdd2oedx
-VERSION=0.1.0
+AC_CONFIG_SRCDIR([src/main.cpp])
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
-
+AC_PROG_CXXCPP
 AC_PROG_CXX
 
-AC_OUTPUT(Makefile src/Makefile)
+AM_INIT_AUTOMAKE([1.16.2])
+
+AC_LANG([C++])
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS([string])
+AC_CHECK_HEADERS([iostream])
+AC_CHECK_HEADERS([cstdlib])
+
+AC_TYPE_SIZE_T
+
+AC_SUBST([AM_CXXFLAGS])
+AC_SUBST([AM_LDFLAGS])
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([src/Makefile])
+
+AC_OUTPUT
