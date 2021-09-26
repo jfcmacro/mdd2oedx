@@ -1,6 +1,7 @@
 AC_INIT([mdd2oedx],[0.1.0],[jfcmacro@gmail.com])
 
 AC_CONFIG_SRCDIR([src/main.cpp])
+AC_CONFIG_HEADERS([config.h])
 
 AC_PROG_CXXCPP
 AC_PROG_CXX
@@ -13,6 +14,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([string])
 AC_CHECK_HEADERS([iostream])
 AC_CHECK_HEADERS([cstdlib])
+AC_CHECK_HEADERS([unistd])
 
 AC_TYPE_SIZE_T
 
