@@ -15,6 +15,7 @@ AC_CHECK_HEADERS([string])
 AC_CHECK_HEADERS([iostream])
 AC_CHECK_HEADERS([cstdlib])
 AC_CHECK_HEADERS([unistd])
+AC_CHECK_HEADER([libgen])
 
 AC_TYPE_SIZE_T
 
