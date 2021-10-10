@@ -1,0 +1,15 @@
+%{
+#include <cstring>
+#include "mdtokens.h"
+%}
+%option noyywrap
+%%
+
+^#{1,6}[ ]     { return strlen(yytext) - 1; }
+^[ ]{4}        { return CODE; }
+^\*[ ]         { return ENUM; }
+\*[A-z0-9]+\*  { return BOLD; }
+.              { return TEXT; }
+\n             { return EOL; }
+
+%%

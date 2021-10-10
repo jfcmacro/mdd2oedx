@@ -38,6 +38,7 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache/
+compile
 config.h
 config.h.in
 config.h.in~
@@ -48,10 +49,16 @@ depcomp
 install-sh
 missing
 stamp-h1
+ylwrap
 src/.deps/
 src/Makefile
 src/Makefile.in
 src/mdd2oedx
+src/mdlexer.cpp
+src/mdlexer.h
 *~     # emacs backup
 *.*~   # emacs backup
 *.*.*~ # emacs backup
+src/*~     # emacs backup
+src/*.*~   # emacs backup
+src/*.*.*~ # emacs backup

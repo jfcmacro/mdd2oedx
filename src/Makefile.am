@@ -1,5 +1,6 @@
 bin_PROGRAMS = mdd2oedx
 
-mdd2oedx_SOURCES = main.cpp
+AM_LFLAGS = --header-file=mdlexer.h
+mdd2oedx_SOURCES = main.cpp mdlexer.lpp mdtokens.h
 
 
