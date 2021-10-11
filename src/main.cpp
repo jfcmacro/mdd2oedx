@@ -31,8 +31,8 @@ static void version(const char* progname) {
 int
 main(int argc, char **argv) {
 
-  char *path = strdup(argv[0]);
-  char *progname = basename(path);
+  char *path = ::strdup(argv[0]);
+  char *progname = ::basename(path);
 
   int c;
   while ((c = getopt(argc, argv, "hv")) != -1) {
@@ -56,10 +56,13 @@ main(int argc, char **argv) {
     if (fd == nullptr)
       std::cerr << "Could't open " << argv[i] << std::endl;
     else {
+      yyrestart(fd);
       yyset_in(fd);
+
       int token;
       while (token = yylex())
 	std::cout << token << std::endl;
+      
       fclose(fd);
     }
   }

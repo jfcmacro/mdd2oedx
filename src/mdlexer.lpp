@@ -5,11 +5,20 @@
 %option noyywrap
 %%
 
-^#{1,6}[ ]     { return strlen(yytext) - 1; }
-^[ ]{4}        { return CODE; }
-^\*[ ]         { return ENUM; }
-\*[A-z0-9]+\*  { return BOLD; }
-.              { return TEXT; }
-\n             { return EOL; }
+^#{1,6}[ ]      { return strlen(yytext) - 1; }
+^(=+)           { return H1; }
+^---            { return DIV; }
+^(-+)           { return H2; }
+^[ ]{4}         { return CODE; }
+^\*[ ]          { return ENUM; }
+^\+[ ]          { return ENUM; }
+^[0-9]+\.[ ]    { return ENUM; }
+^>[ ]           { return BLOCK; }
+\*[:alphanu:]\* { return EMPH; }
+_\w_            { return EMPH; }
+\*\*\w\*\*      { return BOLD; }
+__\w+__         { return BOLD; }
+.               { return TEXT; }
+\n              { return EOL; }
 
 %%
