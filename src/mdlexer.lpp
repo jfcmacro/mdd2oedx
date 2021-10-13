@@ -14,10 +14,10 @@
 ^\+[ ]          { return ENUM; }
 ^[0-9]+\.[ ]    { return ENUM; }
 ^>[ ]           { return BLOCK; }
-\*[:alphanu:]\* { return EMPH; }
-_\w_            { return EMPH; }
-\*\*\w\*\*      { return BOLD; }
-__\w+__         { return BOLD; }
+\*\*.+\*\*    { return BOLD; }
+__.+__        { return BOLD; }
+\*.+\*          { return EMPH; }
+_.+_            { return EMPH; }
 .               { return TEXT; }
 \n              { return EOL; }
 

@@ -38,6 +38,7 @@ main(int argc, char **argv) {
   while ((c = getopt(argc, argv, "hv")) != -1) {
     switch (c) {
     case 'v':
+      version(progname);
       break;
     case 'h':
       usage(progname);
@@ -53,8 +54,10 @@ main(int argc, char **argv) {
     else
       fd = ::stdin;
 
-    if (fd == nullptr)
-      std::cerr << "Could't open " << argv[i] << std::endl;
+    if (fd == nullptr) {
+      std::cerr << "Could't open "
+		<< argv[i] << std::endl;
+    }
     else {
       yyrestart(fd);
       yyset_in(fd);
@@ -62,7 +65,7 @@ main(int argc, char **argv) {
       int token;
       while (token = yylex())
 	std::cout << token << std::endl;
-      
+
       fclose(fd);
     }
   }
