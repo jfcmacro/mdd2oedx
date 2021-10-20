@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include "oedx.h"
 
 static void usage(const char* progname) {
   std::cout << "Usage: " << progname
@@ -70,5 +71,15 @@ main(int argc, char **argv) {
     }
   }
 
+  oedx::Course course("Scala_03", "EPAM Latam");
+
+  std::cout << course.getXMLLine() << std::endl;
+
+  oedx::Module m1;
+  oedx::Module m2;
+
+  std::cout << m1.getUrlName() << std::endl;
+  std::cout << m2.getUrlName() << std::endl;
+  
   return EXIT_SUCCESS;
 }
