@@ -17,8 +17,10 @@ AC_CHECK_HEADERS([iostream])
 AC_CHECK_HEADERS([cstdlib])
 AC_CHECK_HEADERS([unistd])
 AC_CHECK_HEADER([libgen])
-AC_LANG_CPLUSPLUS
-AC_CHECK_LIB(ospp-uuid++, uuid::uuid)
+AC_CHECK_HEADER([uuid++.hh])
+AC_CHECK_HEADER([xercesc/util/PlatformUtils.hpp])
+# AC_LANG_CPLUSPLUS
+# AC_CHECK_LIB([ospp-uuid++], [main])
 
 AC_TYPE_SIZE_T
 

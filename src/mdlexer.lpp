@@ -2,23 +2,62 @@
 #include <cstring>
 #include "mdtokens.h"
 %}
-%option noyywrap
+%option noyywrap yylineno
+%x ITEXT
+%{
+  TokenInfo *prevTkn = nullptr;
+  TokenInfo *currTkn = nullptr;
+%}
 %%
 
-^#{1,6}[ ]      { return strlen(yytext) - 1; }
-^(=+)           { return H1; }
-^---            { return DIV; }
-^(-+)           { return H2; }
-^[ ]{4}         { return CODE; }
-^\*[ ]          { return ENUM; }
-^\+[ ]          { return ENUM; }
-^[0-9]+\.[ ]    { return ENUM; }
-^>[ ]           { return BLOCK; }
-\*\*.+\*\*    { return BOLD; }
-__.+__        { return BOLD; }
-\*.+\*          { return EMPH; }
-_.+_            { return EMPH; }
-.               { return TEXT; }
-\n              { return EOL; }
+^#{1,6}[ ]      {
+                  TokenType tknType = H1;
+                  switch (::strlen(yytext)) {
+		  case 1: tknType = H1; break;
+		  case 2: tknType = H2; break;
+		  case 3: tknType = H3; break;
+		  case 4: tknType = H4; break;
+		  case 5: tknType = H5; break;
+		  case 6: tknType = H6; break;
+		  }
+                  currTkn = new TokenInfo(tknType,yylineno, 0);
+                  BEGIN ITEXT;
+                }
+^\*[ ]          {
+                  currTkn = new TokenInfo(ITEM, yylineno, 0);
+                  BEGIN ITEXT;
+		}
+^\+[ ]          {
+                  currTkn = new TokenInfo(ITEM, yylineno, 0);
+                  BEGIN ITEXT;
+		}
+^[0-9]+\.[ ]    {
+                  currTkn = new TokenInfo(ENUM, yylineno, 0);
+                  BEGIN ITEXT;
+		}
+^>[ ]           {
+                  currTkn = new TokenInfo(BLOCK, yylineno, 0);
+                  BEGIN ITEXT;
+		}
+<ITEXT>{
+.               {
+                  currTkn->addText(*yytext);
+                }
+\n              {
+                   BEGIN INITIAL;
+		   return currTkn->getTokenType();
+                }
+}
+.               {
+                   if (currTkn == nullptr)
+		      currTkn = new TokenInfo(TEXT, yylineno, 0);
+		   currTkn->addText(*yytext);
+                }
+<<EOF>>         {
+                   return TKEOF;
+                }
+\n              {
+                   return currTkn->getTokenType();
+                }
 
 %%

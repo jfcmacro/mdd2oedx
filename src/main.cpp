@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <xercesc/util/PlatformUtils.hpp>
 #include "oedx.h"
 
 static void usage(const char* progname) {
@@ -32,6 +33,13 @@ static void version(const char* progname) {
 int
 main(int argc, char **argv) {
 
+  try {
+    xercesc::XMLPlatformUtils::Initialize();
+  }
+  catch(const xercesc::XMLException& toCatch) {
+    return EXIT_FAILURE;
+  }
+
   char *path = ::strdup(argv[0]);
   char *progname = ::basename(path);
 
@@ -50,7 +58,7 @@ main(int argc, char **argv) {
   for (int i = optind; i < argc; ++i) {
     FILE *fd = nullptr;
 
-    if (strcmp(argv[i], "-") != 0)
+    if (::strcmp(argv[i], "-") != 0)
       fd = ::fopen(argv[i], "r");
     else
       fd = ::stdin;
@@ -62,11 +70,12 @@ main(int argc, char **argv) {
     else {
       yyrestart(fd);
       yyset_in(fd);
-
-      int token;
-      while (token = yylex())
-	std::cout << token << std::endl;
-
+      extern TokenInfo *currTkn;
+      TokenType token;
+      while ((token = ((TokenType) yylex())) != TKEOF) {
+	std::cout << currTkn->getText() << std::endl;
+	delete currTkn;
+      }
       fclose(fd);
     }
   }
@@ -80,6 +89,8 @@ main(int argc, char **argv) {
 
   std::cout << m1.getUrlName() << std::endl;
   std::cout << m2.getUrlName() << std::endl;
+
+  xercesc::XMLPlatformUtils::Terminate();
   
   return EXIT_SUCCESS;
 }

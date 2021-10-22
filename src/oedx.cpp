@@ -21,10 +21,44 @@ namespace oedx {
     return url_name;
   }
 
+  Elem::Elem() : Named() { }
+
+  Elem::~Elem() { }
+
+  Html::Html(std::string& body) : Elem(),
+				  body(body) { }
+
+  std::string Html::getBody() const {
+    return body;
+  }
+
+  Section::Section() : Named(),
+		       elems() { }
+
+  void Section::addElem(Elem* elem) {
+    elems.push_back(elem);
+  }
+
+  Unit::Unit() : Named(),
+		 sections() { }
+
+  void Unit::addSection(Section& section) {
+    sections.push_back(section);
+  }
+
+  Module::Module() : Named(),
+		     units() { }
+
+  void Module::addUnit(Unit& unit) {
+    units.push_back(unit);
+  }
+
+
   Course::Course(std::string name,
 		 std::string org) : Named(name),
 				    name(name),
-				    org(org) {
+				    org(org),
+                                    modules() {
     std::transform(url_name.begin(),
 		   url_name.end(),
 		   url_name.begin(),
@@ -32,7 +66,7 @@ namespace oedx {
   }
 
   std::string
-  oedx::Course::getXMLLine() const {
+  Course::getXMLLine() const {
     std::ostringstream sout;
 
     sout << "<course url_name=" << '"'
@@ -46,5 +80,7 @@ namespace oedx {
     return sout.str();
   }
 
-  Module::Module() : Named() { }
+  void Course::addModule(Module& mod) {
+    modules.push_back(mod);
+  }
 }

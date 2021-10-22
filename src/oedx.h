@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 namespace oedx {
   class Named {
@@ -11,16 +12,49 @@ namespace oedx {
     virtual std::string getUrlName() const;
   };
 
-  class Course : public Named {
-    std::string name;
-    std::string org;
+  class Elem : public Named {
   public:
-    Course(std::string name, std::string org);
-    std::string getXMLLine() const;
+    Elem();
+    virtual ~Elem() = 0;
+  };
+
+  class Html : public Elem {
+    std::string body;
+  public:
+    Html(std::string& body);
+    std::string getBody() const;
+  };
+
+
+  class Section : public Named {
+    std::vector<Elem*> elems;
+  public:
+    Section();
+    void addElem(Elem* elem);
+  };
+
+  class Unit : public Named {
+    std::vector<Section> sections;
+  public:
+    Unit();
+    void addSection(Section& section);
   };
 
   class Module : public Named {
+    std::vector<Unit> units;
   public:
     Module();
+    void addUnit(Unit& unit);
   };
+
+  class Course : public Named {
+    std::string name;
+    std::string org;
+    std::vector<Module> modules;
+  public:
+    Course(std::string name, std::string org);
+    std::string getXMLLine() const;
+    void addModule(Module& mod); 
+  };
+
 }

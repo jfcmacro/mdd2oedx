@@ -1,17 +1,19 @@
 #pragma once
+#include <string>
 
-const int H1 = 1;
-const int H2 = 2;
-const int H3 = 3;
-const int H4 = 4;
-const int H5 = 5;
-const int H6 = 6;
-const int TEXT = 7;
-const int CODE = 8;
-const int ENUM = 9;
-const int EMPH = 10;
-const int DIV = 11;
-const int BLOCK = 12;
-const int BOLD = 13;
-const int EOL = 255;
+enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD };
 
+class TokenInfo {
+  TokenType tokenType;
+  std::string text;
+  int line;
+  int col;
+ public:
+  TokenInfo(TokenType tokenType, int line, int col);
+  ~TokenInfo();
+  void addText(char c);
+  int getLine() const;
+  int getCol() const;
+  TokenType getTokenType() const;
+  std::string getText() const;
+};
