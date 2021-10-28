@@ -11,113 +11,120 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
 %}
 %%
 
-^#{1,6}[ ]        {
-                     TokenType tknType = H1;
-                     switch (::strlen(yytext)) {
-		     case 1: tknType = H1; break;
-		     case 2: tknType = H2; break;
-		     case 3: tknType = H3; break;
-		     case 4: tknType = H4; break;
-		     case 5: tknType = H5; break;
-		     case 6: tknType = H6; break;
-		     }
-                     TokenInfo::createCurrTkn(tknType,yylineno);
-                     BEGIN ITEXT;
-                  }
-(^\*[ ])|(^\+[ ]) {
-                     TokenInfo::createCurrTkn(ITEM, yylineno);
-                     BEGIN ITEXT;
-		  }
-^[0-9]+\.[ ]      {
-                     TokenInfo::createCurrTkn(ENUM, yylineno);
-                     BEGIN ITEXT;
-		  }
-^>[ ]             {
-                     TokenInfo::createCurrTkn(BLOCK, yylineno);
-                     BEGIN ITEXT;
-		  }
-^>>               {
-                     TokenInfo::createCurrTkn(LABEL, yylineno);
-		     lblState = INLABEL;
-                     BEGIN LABELTXT;
-                  }
+^#{1,6}[ ]             {
+                         TokenType tknType = H1;
+                         switch (::strlen(yytext)) {
+		         case 1: tknType = H1; break;
+		         case 2: tknType = H2; break;
+		         case 3: tknType = H3; break;
+		         case 4: tknType = H4; break;
+		         case 5: tknType = H5; break;
+		         case 6: tknType = H6; break;
+		         }
+                         TokenInfo::createCurrTkn(tknType,yylineno);
+                         BEGIN ITEXT;
+                       }
+(^\*[ ])|(^\+[ ])      {
+                         TokenInfo::createCurrTkn(ITEM, yylineno);
+                         BEGIN ITEXT;
+		       }
+^[0-9]+\.[ ]           {
+                         TokenInfo::createCurrTkn(ENUM, yylineno);
+                         BEGIN ITEXT;
+		       }
+^>[ ]                  {
+                         TokenInfo::createCurrTkn(BLOCK, yylineno);
+                         BEGIN ITEXT;
+		       }
+^>>                    {
+                         TokenInfo::createCurrTkn(LABEL, yylineno);
+		         lblState = INLABEL;
+                         BEGIN LABELTXT;
+                       }
 <ITEXT>{
-\*[^*]+\*         {
-		    TokenContent* p = new TokenContentText();
-		    std::string text(yytext);
-		    p->setText(text);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
-                  }
-_[^_]+_           {
-		    TokenContent* p = new TokenContentText();
-		    std::string text(yytext);
-		    p->setText(text);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
-                  }
-\*\*[^*]+\*\*     {
-		    TokenContent* p = new TokenContentText();
-		    std::string text(yytext);
-		    p->setText(text);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
-                  }
-__[^_]+__         {
-		    TokenContent* p = new TokenContentText();
-		    std::string text(yytext);
-		    p->setText(text);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
-                  }
-.                 {
-                    TokenInfo* currTkn = TokenInfo::getCurrTkn();
-		    TokenContent* lastText = currTkn->getLastContent();
-		    if (lastText == nullptr) {
-		       lastText = new TokenContentText();
-		       currTkn->addTknContent(lastText);
-		    }
-		    lastText->setText(*yytext);
-                  }
-\n                {
-                     BEGIN INITIAL;
-		     return TokenInfo::getCurrTkn()->getTokenType();
-                  }
+\*[^*]+\* |
+_[^_]+_                {
+		         TokenContent* tc = new TokenContentEmph();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+\*\*[^*]+\*\* |
+__[^_]+__              {
+		         TokenContent* tc = new TokenContentStrong();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+`[^`]`                 {
+		         TokenContent* tc = new TokenContentCode();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+\[[^\]]+\]\([^\)]+\)   {
+		         TokenContent* tc = new TokenContentLink();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+		       }
+\!\[[^\]]+\]\([^\)]+\) {
+		         TokenContent* tc = new TokenContentLink();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+		       }
+.                      {
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+\n                     {
+                         BEGIN INITIAL;
+		         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
 }
 <LABELTXT>{
-\<\<$             {
-                     lblState = NEXTOUT;
-                  }
-.                 {
-                    TokenInfo* currTkn = TokenInfo::getCurrTkn();
-		    TokenContent* lastText = currTkn->getLastContent();
-		    if (lastText == nullptr) {
-		       lastText = new TokenContentText();
-		       currTkn->addTknContent(lastText);
-		    }
-		    lastText->setText(*yytext);
-                  }
-\n                {
-                     if (lblState != NEXTOUT) {
-		        std::cerr << "Label doesn't end with << at line: "
-			          << yylineno << std::endl;
-		        yyterminate();
-	             }
-                     BEGIN INITIAL;
-		     lblState = OUTLABEL;
-		     return TokenInfo::getCurrTkn()->getTokenType();
-                  }
+\<\<$                  {
+                         lblState = NEXTOUT;
+                       }
+.                      {
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+\n                     {
+                         if (lblState != NEXTOUT) {
+		            std::cerr << "Label doesn't end with << at line: "
+			              << yylineno << std::endl;
+		            yyterminate();
+	                 }
+                         BEGIN INITIAL;
+		         lblState = OUTLABEL;
+		         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
 }
-.                 {
-                     TokenInfo* currTkn = TokenInfo::getCurrTkn();
-		     TokenContent* lastText = currTkn->getLastContent();
-		     if (lastText == nullptr) {
-		        lastText = new TokenContentText();
-		        currTkn->addTknContent(lastText);
-		     }
-		     lastText->setText(*yytext);
-                  }
-<<EOF>>           {
-                     return TKEOF;
-                  }
-\n                {
-                     return TokenInfo::getCurrTkn()->getTokenType();
-                  }
-
+.                      {
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+<<EOF>>                {
+                         return TKEOF;
+                       }
+\n                     {
+                         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
 %%
