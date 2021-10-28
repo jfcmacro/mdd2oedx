@@ -67,9 +67,13 @@ __[^_]+__         {
 		    TokenInfo::getCurrTkn()->addTknContent(p);
                   }
 .                 {
-		    TokenContent* p = new TokenContentText();
-		    p->setText(*yytext);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
+                    TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		    TokenContent* lastText = currTkn->getLastContent();
+		    if (lastText == nullptr) {
+		       lastText = new TokenContentText();
+		       currTkn->addTknContent(lastText);
+		    }
+		    lastText->setText(*yytext);
                   }
 \n                {
                      BEGIN INITIAL;
@@ -81,9 +85,13 @@ __[^_]+__         {
                      lblState = NEXTOUT;
                   }
 .                 {
-		    TokenContent* p = new TokenContentText();
-		    p->setText(*yytext);
-		    TokenInfo::getCurrTkn()->addTknContent(p);
+                    TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		    TokenContent* lastText = currTkn->getLastContent();
+		    if (lastText == nullptr) {
+		       lastText = new TokenContentText();
+		       currTkn->addTknContent(lastText);
+		    }
+		    lastText->setText(*yytext);
                   }
 \n                {
                      if (lblState != NEXTOUT) {
@@ -97,10 +105,13 @@ __[^_]+__         {
                   }
 }
 .                 {
-                     TokenInfo::createCurrTkn(TEXT, yylineno);
-		     TokenContent* p = new TokenContentText();
-		     p->setText(*yytext);
-		     TokenInfo::getCurrTkn()->addTknContent(p);
+                     TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		     TokenContent* lastText = currTkn->getLastContent();
+		     if (lastText == nullptr) {
+		        lastText = new TokenContentText();
+		        currTkn->addTknContent(lastText);
+		     }
+		     lastText->setText(*yytext);
                   }
 <<EOF>>           {
                      return TKEOF;

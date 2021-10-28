@@ -67,7 +67,7 @@ TokenContentStrong::TokenContentStrong() :
 TokenContentStrong::~TokenContentStrong() { }
 
 bool
-TokenContentEmph::isText() const {
+TokenContentStrong::isText() const {
   return false;
 }
 

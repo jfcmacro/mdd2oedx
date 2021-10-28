@@ -10,7 +10,7 @@ protected:
 public:
   TokenContent();
   virtual ~TokenContent() = 0;
-  virtual bool isText() const;
+  virtual bool isText() const = 0;
   std::string getText();
   void setText(char c);
   void setText(const std::string& text);
