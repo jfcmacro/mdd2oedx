@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <vector>
+#include <algorithm>
 #include <xercesc/util/PlatformUtils.hpp>
 #include "oedx.h"
 
@@ -70,11 +72,15 @@ main(int argc, char **argv) {
     else {
       yyrestart(fd);
       yyset_in(fd);
-      extern TokenInfo *currTkn;
       TokenType token;
       while ((token = ((TokenType) yylex())) != TKEOF) {
-	std::cout << currTkn->getText() << std::endl;
-	delete currTkn;
+	TokenInfo *tknInfo = TokenInfo::getCleanCurrTkn();
+	std::vector<TokenContent*> *pTknCont = tknInfo->getContent();
+	std::for_each(pTknCont->begin(),
+		      pTknCont->end(),
+		      [](TokenContent* tc) {
+			std::cout << tc->getText() << std::endl;
+		      });
       }
       fclose(fd);
     }
@@ -91,6 +97,6 @@ main(int argc, char **argv) {
   std::cout << m2.getUrlName() << std::endl;
 
   xercesc::XMLPlatformUtils::Terminate();
-  
+
   return EXIT_SUCCESS;
 }
