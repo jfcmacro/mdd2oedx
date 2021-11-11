@@ -3,6 +3,7 @@
 #include "mdtokens.h"
 #include <unistd.h>
 #include <libgen.h>
+#include <sstream>
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -32,6 +33,24 @@ static void version(const char* progname) {
   exit(EXIT_SUCCESS);
 }
 
+oedx::Course*
+createCourse(TokenInfo *currTkn) {
+  std::vector<TokenContent*> *vec_cont = currTkn->getContent();
+  std::istringstream ist((*vec_cont)[0]->getText());
+  std::string url_name, name, org;
+
+  char del { '.' };
+
+  getline(ist, url_name, del);
+  getline(ist, name, del);
+  getline(ist, org);
+
+  name = name.substr(1);
+  org = org.substr(1);
+  
+  return new oedx::Course(url_name, name, org);
+}
+
 int
 main(int argc, char **argv) {
 
@@ -57,6 +76,10 @@ main(int argc, char **argv) {
     }
   }
 
+  oedx::Course *course = nullptr;
+  oedx::Module *currMod = nullptr;
+  oedx::Unit   *currUnit = nullptr;
+
   for (int i = optind; i < argc; ++i) {
     FILE *fd = nullptr;
 
@@ -75,26 +98,34 @@ main(int argc, char **argv) {
       TokenType token;
       while ((token = ((TokenType) yylex())) != TKEOF) {
 	TokenInfo *tknInfo = TokenInfo::getCleanCurrTkn();
-	std::vector<TokenContent*> *pTknCont = tknInfo->getContent();
-	std::for_each(pTknCont->begin(),
-		      pTknCont->end(),
-		      [](TokenContent* tc) {
-			std::cout << tc->getText() << std::endl;
-		      });
+	switch (token) {
+	case H1:
+	  course = createCourse(tknInfo);
+	  break;
+	case H2:
+	  {
+	    std::vector<TokenContent*>* vector = tknInfo->getContent();
+	    std::string title((*vector)[0]->getText());
+	    oedx::Module *mod = new oedx::Module(title);
+	    course->addModule(mod);
+	    currMod = mod;
+	  }
+	  break;
+	case H3:
+	  { std::vector<TokenContent*>* vector = tknInfo->getContent();
+	    std::string title((*vector)[0]->getText());
+	    oedx::Unit *unit = new oedx::Unit(title);
+	    currMod->addUnit(unit);
+	  }
+	  break;
+	}
       }
       fclose(fd);
     }
   }
 
-  oedx::Course course("Scala_03", "EPAM Latam");
 
-  std::cout << course.getXMLLine() << std::endl;
-
-  oedx::Module m1;
-  oedx::Module m2;
-
-  std::cout << m1.getUrlName() << std::endl;
-  std::cout << m2.getUrlName() << std::endl;
+  std::cout << course->getXMLLine() << std::endl;
 
   xercesc::XMLPlatformUtils::Terminate();
 

@@ -13,7 +13,7 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
 
 ^#{1,6}[ ]             {
                          TokenType tknType = H1;
-                         switch(yyleng) {
+                         switch(yyleng - 1) {
 		         case 1: tknType = H1; break;
 		         case 2: tknType = H2; break;
 		         case 3: tknType = H3; break;
@@ -134,10 +134,16 @@ __[^_]+__              {
 		         }
 		         lastText->setText(*yytext);
                        }
+[ \t]+\n               {
+                          TokenInfo::createCurrTkn(BLANK_LINE, yylineno);
+			  return TokenInfo::getCurrTkn()->getTokenType();
+                       }
 <<EOF>>                {
                          return TKEOF;
                        }
 \n                     {
+                         if (TokenInfo::getCurrTkn() == nullptr)
+			    TokenInfo::createCurrTkn(BLANK_LINE, yylineno);
                          return TokenInfo::getCurrTkn()->getTokenType();
                        }
 %%

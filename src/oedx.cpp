@@ -39,26 +39,30 @@ namespace oedx {
     elems.push_back(elem);
   }
 
-  Unit::Unit() : Named(),
-		 sections() { }
+  Unit::Unit(std::string title) : Named(),
+				  title(title),
+				  sections() { }
 
-  void Unit::addSection(Section& section) {
+  void Unit::addSection(Section* section) {
     sections.push_back(section);
   }
 
-  Module::Module() : Named(),
-		     units() { }
+  Module::Module(std::string title) : Named(),
+				      title(title),
+				      units() { }
 
-  void Module::addUnit(Unit& unit) {
+  void Module::addUnit(Unit* unit) {
     units.push_back(unit);
   }
 
 
-  Course::Course(std::string name,
-		 std::string org) : Named(name),
-				    name(name),
-				    org(org),
-                                    modules() {
+  Course::Course(std::string& url_name,
+		 std::string& name,
+		 std::string& org) : Named(url_name),
+				     name(name),
+				     org(org),
+				     language("es"),
+				     modules() {
     std::transform(url_name.begin(),
 		   url_name.end(),
 		   url_name.begin(),
@@ -80,7 +84,7 @@ namespace oedx {
     return sout.str();
   }
 
-  void Course::addModule(Module& mod) {
+  void Course::addModule(Module* mod) {
     modules.push_back(mod);
   }
 }

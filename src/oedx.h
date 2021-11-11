@@ -25,7 +25,6 @@ namespace oedx {
     std::string getBody() const;
   };
 
-
   class Section : public Named {
     std::vector<Elem*> elems;
   public:
@@ -34,27 +33,32 @@ namespace oedx {
   };
 
   class Unit : public Named {
-    std::vector<Section> sections;
+    std::vector<Section*> sections;
+    std::string title;
   public:
-    Unit();
-    void addSection(Section& section);
+    Unit(std::string title);
+    void addSection(Section* section);
+    std::string getTitle();
   };
 
   class Module : public Named {
-    std::vector<Unit> units;
+    std::vector<Unit*> units;
+    std::string title;
   public:
-    Module();
-    void addUnit(Unit& unit);
+    Module(std::string title);
+    void addUnit(Unit* unit);
+    std::string getTitle();
   };
 
   class Course : public Named {
     std::string name;
     std::string org;
-    std::vector<Module> modules;
+    std::string language;
+    std::vector<Module*> modules;
   public:
-    Course(std::string name, std::string org);
+    Course(std::string& url_name, std::string& name, std::string& org);
     std::string getXMLLine() const;
-    void addModule(Module& mod); 
+    void addModule(Module* mod); 
   };
 
 }
