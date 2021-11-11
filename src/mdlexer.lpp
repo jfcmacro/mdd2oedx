@@ -13,7 +13,7 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
 
 ^#{1,6}[ ]             {
                          TokenType tknType = H1;
-                         switch (::strlen(yytext)) {
+                         switch(yyleng) {
 		         case 1: tknType = H1; break;
 		         case 2: tknType = H2; break;
 		         case 3: tknType = H3; break;
@@ -36,6 +36,14 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
                          TokenInfo::createCurrTkn(BLOCK, yylineno);
                          BEGIN ITEXT;
 		       }
+^\([ ]\)[ ]            {
+                         TokenInfo::createCurrTkn(CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
+^\([xX]\)[ ]           {
+                         TokenInfo::createCurrTkn(SELECTED_CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
 ^>>                    {
                          TokenInfo::createCurrTkn(LABEL, yylineno);
 		         lblState = INLABEL;
@@ -113,7 +121,12 @@ __[^_]+__              {
                        }
 }
 .                      {
+                         BEGIN ITEXT;
                          TokenInfo* currTkn = TokenInfo::getCurrTkn();
+			 if (currTkn == nullptr) {
+			    TokenInfo::createCurrTkn(TEXT,yylineno);
+			    currTkn = TokenInfo::getCurrTkn();
+			 }
 		         TokenContent* lastText = currTkn->getLastContent();
 		         if (lastText == nullptr) {
 		            lastText = new TokenContentText();

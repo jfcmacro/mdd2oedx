@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD, LABEL };
+enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD, LABEL, CHOICE, SELECTED_CHOICE};
 
 class TokenContent {
 protected:

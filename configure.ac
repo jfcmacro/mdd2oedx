@@ -19,8 +19,6 @@ AC_CHECK_HEADERS([unistd])
 AC_CHECK_HEADER([libgen])
 AC_CHECK_HEADER([uuid++.hh])
 AC_CHECK_HEADER([xercesc/util/PlatformUtils.hpp])
-# AC_LANG_CPLUSPLUS
-# AC_CHECK_LIB([ospp-uuid++], [main])
 
 AC_TYPE_SIZE_T
 
