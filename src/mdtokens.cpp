@@ -1,4 +1,5 @@
 #include "mdtokens.h"
+#include "mdlexer.h"
 
 static TokenInfo* currTkn;
 
@@ -131,4 +132,17 @@ TokenInfo::getLastContent() {
   TokenContent* tc = tkncnt.back();
   if (tc->isText()) return tc;
   return nullptr;
+}
+
+std::vector<TokenInfo*>*
+processInput(FILE* fd) {
+  yyrestart(fd);
+  yyset_in(fd);
+  TokenType token;
+  std::vector<TokenInfo*>* vec = new std::vector<TokenInfo*>();
+
+  while ((token = ((TokenType) yylex())) != TKEOF)
+    vec->push_back(TokenInfo::getCleanCurrTkn());
+
+  return vec;
 }

@@ -39,15 +39,17 @@ namespace oedx {
     Unit(std::string title);
     void addSection(Section* section);
     std::string getTitle();
+    Section* getLastSection() const;
   };
 
   class Module : public Named {
     std::vector<Unit*> units;
     std::string title;
   public:
-    Module(std::string title);
+    Module(std::string& title);
     void addUnit(Unit* unit);
     std::string getTitle();
+    Unit* getLastUnit() const;
   };
 
   class Course : public Named {
@@ -58,7 +60,8 @@ namespace oedx {
   public:
     Course(std::string& url_name, std::string& name, std::string& org);
     std::string getXMLLine() const;
-    void addModule(Module* mod); 
+    void addModule(Module* mod);
+    Module* getLastModule() const
   };
 
 }

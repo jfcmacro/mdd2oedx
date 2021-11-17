@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cstdio>
 
-enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD, LABEL, CHOICE, SELECTED_CHOICE, BLANK_LINE};
+enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD, LABEL, ONE_CHOICE, SELECTED_ONE_CHOICE, MULT_CHOICE, SELECTED_MULT_CHOICE, BLANK_LINE};
 
 class TokenContent {
 protected:
@@ -76,3 +77,5 @@ public:
   std::vector<TokenContent*>* getContent();
   TokenContent* getLastContent();
 };
+
+std::vector<TokenInfo*>* processInput(FILE* fd);

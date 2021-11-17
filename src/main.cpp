@@ -1,5 +1,4 @@
 #include "../config.h"
-#include "mdlexer.h"
 #include "mdtokens.h"
 #include <unistd.h>
 #include <libgen.h>
@@ -47,7 +46,7 @@ createCourse(TokenInfo *currTkn) {
 
   name = name.substr(1);
   org = org.substr(1);
-  
+
   return new oedx::Course(url_name, name, org);
 }
 
@@ -82,6 +81,7 @@ main(int argc, char **argv) {
 
   for (int i = optind; i < argc; ++i) {
     FILE *fd = nullptr;
+    std::vector<TokenInfo*>* vec = nullptr;
 
     if (::strcmp(argv[i], "-") != 0)
       fd = ::fopen(argv[i], "r");
@@ -93,39 +93,13 @@ main(int argc, char **argv) {
 		<< argv[i] << std::endl;
     }
     else {
-      yyrestart(fd);
-      yyset_in(fd);
-      TokenType token;
-      while ((token = ((TokenType) yylex())) != TKEOF) {
-	TokenInfo *tknInfo = TokenInfo::getCleanCurrTkn();
-	switch (token) {
-	case H1:
-	  course = createCourse(tknInfo);
-	  break;
-	case H2:
-	  {
-	    std::vector<TokenContent*>* vector = tknInfo->getContent();
-	    std::string title((*vector)[0]->getText());
-	    oedx::Module *mod = new oedx::Module(title);
-	    course->addModule(mod);
-	    currMod = mod;
-	  }
-	  break;
-	case H3:
-	  { std::vector<TokenContent*>* vector = tknInfo->getContent();
-	    std::string title((*vector)[0]->getText());
-	    oedx::Unit *unit = new oedx::Unit(title);
-	    currMod->addUnit(unit);
-	  }
-	  break;
-	}
-      }
+      vec = processInput(fd);
       fclose(fd);
     }
   }
 
 
-  std::cout << course->getXMLLine() << std::endl;
+  // std::cout << course->getXMLLine() << std::endl;
 
   xercesc::XMLPlatformUtils::Terminate();
 

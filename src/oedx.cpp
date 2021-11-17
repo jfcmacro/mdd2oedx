@@ -47,12 +47,20 @@ namespace oedx {
     sections.push_back(section);
   }
 
-  Module::Module(std::string title) : Named(),
+  Section* Unit::getLastSection() const {
+    return sections.back();
+  }
+
+  Module::Module(std::string& title) : Named(),
 				      title(title),
 				      units() { }
 
   void Module::addUnit(Unit* unit) {
     units.push_back(unit);
+  }
+
+  Unit* Module::getLastCrntUnit() const {
+    return units.back();
   }
 
 
@@ -65,7 +73,7 @@ namespace oedx {
 				     modules() {
     std::transform(url_name.begin(),
 		   url_name.end(),
-		   url_name.begin(),
+		   this->url_name.begin(),
 		   [](unsigned char c){ return std::tolower(c); });
   }
 
@@ -86,5 +94,9 @@ namespace oedx {
 
   void Course::addModule(Module* mod) {
     modules.push_back(mod);
+  }
+
+  Module* Course::getLastModule() const {
+    return modules.back();
   }
 }
