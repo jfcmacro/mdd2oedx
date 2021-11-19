@@ -3,7 +3,10 @@
 #include <vector>
 #include <cstdio>
 
-enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH, DIV, BLOCK, BOLD, LABEL, ONE_CHOICE, SELECTED_ONE_CHOICE, MULT_CHOICE, SELECTED_MULT_CHOICE, BLANK_LINE};
+enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH,
+  DIV, BLOCK, BOLD, LABEL,
+  ONE_CHOICE, SELECTED_ONE_CHOICE, MULT_CHOICE, SELECTED_MULT_CHOICE,
+  BLANK_LINE};
 
 class TokenContent {
 protected:
@@ -12,7 +15,8 @@ public:
   TokenContent();
   virtual ~TokenContent() = 0;
   virtual bool isText() const = 0;
-  std::string getText();
+  virtual std::string getHtmlText() const = 0;
+  std::string getText() const;
   void setText(char c);
   void setText(const std::string& text);
 
@@ -23,6 +27,7 @@ public:
   TokenContentText();
   virtual ~TokenContentText();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenContentLink : public TokenContent {
@@ -30,6 +35,7 @@ public:
   TokenContentLink();
   virtual ~TokenContentLink();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenContentImage : public TokenContent {
@@ -37,6 +43,7 @@ public:
   TokenContentImage();
   virtual ~TokenContentImage();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenContentEmph : public TokenContent {
@@ -44,6 +51,7 @@ public:
   TokenContentEmph();
   virtual ~TokenContentEmph();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenContentStrong : public TokenContent {
@@ -51,6 +59,7 @@ public:
   TokenContentStrong();
   virtual ~TokenContentStrong();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenContentCode : public TokenContent {
@@ -58,6 +67,7 @@ public:
   TokenContentCode();
   virtual ~TokenContentCode();
   virtual bool isText() const;
+  virtual std::string getHtmlText() const;
 };
 
 class TokenInfo {

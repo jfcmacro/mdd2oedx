@@ -8,7 +8,7 @@ TokenContent::TokenContent() : text() { }
 TokenContent::~TokenContent() { }
 
 std::string
-TokenContent::getText() {
+TokenContent::getText() const {
   return text;
 }
 
@@ -32,6 +32,11 @@ TokenContentText::isText() const {
   return true;
 }
 
+std::string
+TokenContentText::getHtmlText() const {
+  return getText();
+}
+
 TokenContentLink::TokenContentLink() :
   TokenContent() { }
 
@@ -40,6 +45,11 @@ TokenContentLink::~TokenContentLink() { }
 bool
 TokenContentLink::isText() const {
   return false;
+}
+
+std::string
+TokenContentLink::getHtmlText() const {
+  return getText();
 }
 
 TokenContentImage::TokenContentImage() :
@@ -52,6 +62,11 @@ TokenContentImage::isText() const {
   return false;
 }
 
+std::string
+TokenContentImage::getHtmlText() const {
+  return getText();
+}
+
 TokenContentEmph::TokenContentEmph() :
   TokenContent() { }
 
@@ -60,6 +75,12 @@ TokenContentEmph::~TokenContentEmph() { }
 bool
 TokenContentEmph::isText() const {
   return false;
+}
+
+std::string
+TokenContentEmph::getHtmlText() const {
+  std::string retVal { "<em>" + getText() + "</em>" };
+  return retVal;
 }
 
 TokenContentStrong::TokenContentStrong() :
@@ -72,6 +93,12 @@ TokenContentStrong::isText() const {
   return false;
 }
 
+std::string
+TokenContentStrong::getHtmlText() const {
+  std::string retVal { "<strong>" + getText() + "</strong>" };
+  return retVal;
+}
+
 TokenContentCode::TokenContentCode() :
   TokenContent() { }
 
@@ -80,6 +107,12 @@ TokenContentCode::~TokenContentCode() { }
 bool
 TokenContentCode::isText() const {
   return false;
+}
+
+std::string
+TokenContentCode::getHtmlText() const {
+  std::string retVal { "<pre>" + getText() + "</pre>" };
+  return retVal;
 }
 
 TokenInfo::TokenInfo(TokenType tokenType,

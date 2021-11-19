@@ -51,7 +51,7 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
 ^\[[xX]\][ ]           {
                          TokenInfo::createCurrTkn(SELECTED_MULT_CHOICE, yylineno);
                          BEGIN ITEXT;
-                       }		       
+                       }
 ^>>                    {
                          TokenInfo::createCurrTkn(LABEL, yylineno);
 		         lblState = INLABEL;

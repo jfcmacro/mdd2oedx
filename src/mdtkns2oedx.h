@@ -1,5 +1,5 @@
 #pragma once
 #include "oedx.h"
-#include "mdtoken.h"
+#include "mdtokens.h"
 
-Course* processTokens(const std::vector<TokenInfo*>* vec);
+oedx::Course* processTokens(const std::vector<TokenInfo*>* vec);
