@@ -37,8 +37,11 @@ TokenContentText::getHtmlText() const {
   return getText();
 }
 
-TokenContentLink::TokenContentLink() :
-  TokenContent() { }
+TokenContentLink::TokenContentLink(std::string& text,
+				   std::string& url) : TokenContent(),
+						       url(url) {
+  this->setText(text);
+}
 
 TokenContentLink::~TokenContentLink() { }
 
@@ -49,7 +52,8 @@ TokenContentLink::isText() const {
 
 std::string
 TokenContentLink::getHtmlText() const {
-  return getText();
+  std::string ret {"<a href=\"" + url + "\">" + text + "</a>"};
+  return ret;
 }
 
 TokenContentImage::TokenContentImage() :
@@ -96,6 +100,22 @@ TokenContentStrong::isText() const {
 std::string
 TokenContentStrong::getHtmlText() const {
   std::string retVal { "<strong>" + getText() + "</strong>" };
+  return retVal;
+}
+
+TokenContentDel::TokenContentDel() :
+  TokenContent() { }
+
+TokenContentDel::~TokenContentDel() { }
+
+bool
+TokenContentDel::isText() const {
+  return false;
+}
+
+std::string
+TokenContentDel::getHtmlText() const {
+  std::string retVal { "<del>" + getText() + "</del>" };
   return retVal;
 }
 

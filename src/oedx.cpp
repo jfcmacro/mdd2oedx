@@ -198,4 +198,5 @@ namespace oedx {
   Module* Course::getLastModule() const {
     return modules.back();
   }
+
 }

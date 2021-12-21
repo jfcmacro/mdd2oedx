@@ -1,8 +1,12 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 namespace oedx {
+
+  // enum Levels { Course, Module, Unit, Section, Chapter, SubChapter };
+
   class Named {
   protected:
     std::string url_name;
@@ -101,4 +105,30 @@ namespace oedx {
     Module* getLastModule() const;
   };
 
+  enum OedxNode { OCourse, OModule, OUnit, OSection, OChapter, OSubChapter };
+
+  class Leaf {
+  protected:
+    std::string uuid;
+  public:
+    Leaf();
+    virtual ~Leaf() = 0;
+    virtual std::string getText() const = 0;
+  };
+
+  class Node {
+    std::vector<Node*> children;
+    std::vector<Leaf*> leaves;
+    std::map<std::string, std::string> attrs;
+    OedxNode typeNode;
+  protected:
+    std::string uuid;
+  public:
+    Node(OedxNode typeNode, std::string& uuid);
+    Node(OedxNode typeNode);
+    void setAttr(std::string& key, std::string& value);
+    std::string getAttr(std::string& key) const;
+    void addChild(Node* child);
+    Node* getLastChild() const;
+  };
 }

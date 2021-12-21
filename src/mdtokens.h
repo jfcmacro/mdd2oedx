@@ -3,8 +3,10 @@
 #include <vector>
 #include <cstdio>
 
-enum TokenType { TKEOF, H1, H2, H3, H4, H5, H6, TEXT, CODE, ITEM, ENUM, EMPH,
-  DIV, BLOCK, BOLD, LABEL,
+enum TokenType { TKEOF,
+  H1, H2, H3, H4, H5, H6,
+  TEXT, CODE, ITEM, ENUM, DIV, BLOCK, LABEL,
+  EMPH, BOLD, DEL,
   ONE_CHOICE, SELECTED_ONE_CHOICE, MULT_CHOICE, SELECTED_MULT_CHOICE,
   BLANK_LINE};
 
@@ -16,7 +18,7 @@ public:
   virtual ~TokenContent() = 0;
   virtual bool isText() const = 0;
   virtual std::string getHtmlText() const = 0;
-  std::string getText() const;
+  virtual std::string getText() const;
   void setText(char c);
   void setText(const std::string& text);
 
@@ -31,8 +33,9 @@ public:
 };
 
 class TokenContentLink : public TokenContent {
+  std::string url;
 public:
-  TokenContentLink();
+  TokenContentLink(std::string& text, std::string& url);
   virtual ~TokenContentLink();
   virtual bool isText() const;
   virtual std::string getHtmlText() const;
@@ -62,6 +65,14 @@ public:
   virtual std::string getHtmlText() const;
 };
 
+class TokenContentDel : public TokenContent {
+public:
+  TokenContentDel();
+  virtual ~TokenContentDel();
+  virtual bool isText() const;
+  virtual std::string getHtmlText() const;
+};
+
 class TokenContentCode : public TokenContent {
 public:
   TokenContentCode();
@@ -82,7 +93,6 @@ public:
   ~TokenInfo();
   void addTknContent(TokenContent* tknCont);
   int getLine() const;
-  int getCol() const;
   TokenType getTokenType() const;
   std::vector<TokenContent*>* getContent();
   TokenContent* getLastContent();

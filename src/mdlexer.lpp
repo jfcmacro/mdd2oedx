@@ -1,6 +1,9 @@
 %{
 #include <cstring>
 #include <iostream>
+#include <iterator>
+#include <regex>
+#include <tuple>
 #include "mdtokens.h"
 %}
 %option noyywrap yylineno
@@ -8,6 +11,21 @@
 %x LABELTXT
 %{
 enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
+
+static std::string getRid1S1E(std::string& str) {
+   return str.substr(1,str.size()-2);
+}
+
+static std::string getRid2S2E(std::string& str) {
+   return str.substr(2,str.size()-4);
+}
+
+static std::tuple<std::string,std::string> divLink(std::string &str) {
+   std::string first;
+   std::string second;
+   std::tuple<std::string, std::string> ret(first, second);
+   return ret;
+}
 %}
 %%
 
@@ -62,6 +80,8 @@ enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
 _[^_]+_                {
 		         TokenContent* tc = new TokenContentEmph();
 		         std::string text(yytext);
+			 // text = text.substr(1,text.size()-2);
+			 text = getRid1S1E(text);
 		         tc->setText(text);
 		         TokenInfo::getCurrTkn()->addTknContent(tc);
                        }
@@ -69,6 +89,14 @@ _[^_]+_                {
 __[^_]+__              {
 		         TokenContent* tc = new TokenContentStrong();
 		         std::string text(yytext);
+			 text = getRid2S2E(text);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+~~[^\~]+~~             {
+                         TokenContent* tc = new TokenContentDel();
+		         std::string text(yytext);
+			 text = getRid2S2E(text);
 		         tc->setText(text);
 		         TokenInfo::getCurrTkn()->addTknContent(tc);
                        }
@@ -78,18 +106,17 @@ __[^_]+__              {
 		         tc->setText(text);
 		         TokenInfo::getCurrTkn()->addTknContent(tc);
                        }
-\[[^\]]+\]\([^\)]+\)   {
-		         TokenContent* tc = new TokenContentLink();
-		         std::string text(yytext);
-		         tc->setText(text);
-		         TokenInfo::getCurrTkn()->addTknContent(tc);
-		       }
-\!\[[^\]]+\]\([^\)]+\) {
-		         TokenContent* tc = new TokenContentLink();
-		         std::string text(yytext);
-		         tc->setText(text);
-		         TokenInfo::getCurrTkn()->addTknContent(tc);
-		       }
+\[(.|[^\]]*)\]\([^\)]+\) {
+		            std::string text(yytext);
+		            TokenContent* tc = new TokenContentLink(text, text);
+		            TokenInfo::getCurrTkn()->addTknContent(tc);
+		         }
+\!\[(.|[^\]]*)\]\([^\)]+\) {
+		              TokenContent* tc = new TokenContentImage();
+		              std::string text(yytext);
+		              tc->setText(text);
+		              TokenInfo::getCurrTkn()->addTknContent(tc);
+		           }
 .                      {
                          TokenInfo* currTkn = TokenInfo::getCurrTkn();
 		         TokenContent* lastText = currTkn->getLastContent();
