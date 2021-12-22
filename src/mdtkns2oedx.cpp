@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 #include <stack>
+// To remove
+#include <iostream>
 
 // TODO Improve this section
 // This is added from Stack Overflow
@@ -102,6 +104,7 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
 	  std::string title { (*vstrs)[0] };
 	  oedx::Section *pSection = new oedx::Section(title);
+	  std::cout << title << std::endl;
 	  pCourse
 	    ->getLastModule()
 	    ->getLastUnit()
