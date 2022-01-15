@@ -42,10 +42,10 @@ static std::tuple<std::string,std::string> divLink(std::string &str) {
                          TokenInfo::createCurrTkn(tknType,yylineno);
                          BEGIN ITEXT;
                        }
-(^\*[ ])|(^\+[ ])      {
-                         TokenInfo::createCurrTkn(ITEM, yylineno);
-                         BEGIN ITEXT;
-		       }
+(^(\*|\+|-)[ ])    {
+                      TokenInfo::createCurrTkn(ITEM, yylineno);
+                      BEGIN ITEXT;
+		    }
 ^[0-9]+\.[ ]           {
                          TokenInfo::createCurrTkn(ENUM, yylineno);
                          BEGIN ITEXT;

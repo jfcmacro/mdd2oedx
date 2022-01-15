@@ -6,197 +6,115 @@
 
 namespace oedx {
 
-  Named::Named() {
+  OEdxNode
+  fromTokenType2OEdexNode(TokenType &tknType) {
+    OEdxNode retVal = OEUnknown;
+    switch(tknType) {
+    case H1:
+      retVal = OECourse;
+      break;
+    case H2:
+      retVal = OEModule;
+      break;
+    case H3:
+      retVal = OESequential;
+      break;
+    case H4:
+      retVal = OEVertical;
+      break;
+    case H5:
+      retVal = OEH3;
+      break;
+    case H6:
+      retVal = OEH4;
+      break;
+    default:
+      retVal = OEUnknown;
+    }
+    return retVal;
+  }
+
+  Node::Node(std::string& urlName,
+	     TokenInfo* pTknInfo,
+	     Node* parent) :
+    urlName(urlName),
+    parent(parent),
+    children(),
+    tkncnt() {
+
+    tkncnt.push_back(pTknInfo);
+  }
+
+  Node::Node(TokenInfo* pTknInfo,
+	     Node* parent) :
+    parent(parent),
+    children(),
+    tkncnt() {
     uuid id;
 
     id.make(UUID_MAKE_V1);
-    url_name = id.string();
+    urlName = id.string();
+
+    tkncnt.push_back(pTknInfo);
   }
 
-  Named::Named(std::string url_name) :
-    url_name(url_name) { }
+  Node::Node(Node* parent) :
+    parent(parent),
+    children(),
+    tkncnt() {
+    uuid id;
 
-  std::string
-  Named::getUrlName() const {
-    return url_name;
+    id.make(UUID_MAKE_V1);
+    urlName = id.string();
   }
 
-  Elem::Elem() : Named() { }
-
-  Elem::~Elem() { }
-
-  Elems::Elems() : elems() { }
-
-  Elems::~Elems() { }
-
-  std::vector<Elem*>& Elems::getElems() {
-    return elems;
-  }
-
-  void Elems::addElem(Elem* elem) {
-    this->elems.push_back(elem);
-  }
-
-  Html::Html(std::string& body) : Elem(),
-				  body(body) { }
-
-  Html::~Html() { }
-
-  std::string Html::getBody() const {
-    return body;
-  }
-
-  std::string Html::getText() const {
-    return Html::getBody();
-  }
-
-  SubChapter::SubChapter(std::string& title)
-    : Named(),
-      Elems(),
-      title(title) { }
-
-  std::string
-  SubChapter::getTitle() const {
-    return title;
-  }
-
-  Chapter::Chapter(std::string& title)
-    : Named(),
-      Elems(),
-      subChapters(),
-      title(title) { }
-
-  std::string
-  Chapter::getTitle() const {
-    return title;
-  }
-
-  void Chapter::addSubChapter(SubChapter* subChapter) {
-    subChapters.push_back(subChapter);
-  }
-
-  std::vector<SubChapter*>
-  Chapter::getSubChapters() const {
-    return subChapters;
-  }
-
-  SubChapter* Chapter::getLastSubChapter() const {
-    return subChapters.back();
-  }
-
-  Section::Section(std::string& title)
-    : Named(),
-      Elems(),
-      chapters(),
-      title(title) { }
-
-  std::string
-  Section::getTitle() const {
-    return title;
-  }
-
-  void Section::addChapter(Chapter* section) {
-    chapters.push_back(section);
-  }
-
-  std::vector<Chapter*>
-  Section::getChapters() const {
-    return chapters;
-  }
-
-  Chapter* Section::getLastChapter() const {
-    return chapters.back();
-  }
-
-
-  Unit::Unit(std::string& title) : Named(),
-				   Elems(),
-				   title(title),
-				   sections() { }
-
-  void Unit::addSection(Section* section) {
-    sections.push_back(section);
+  Node::~Node() {
   }
 
   std::string
-  Unit::getTitle() const {
-    return title;
+  Node::getUrlName() const {
+    return urlName;
   }
 
-  std::vector<Section*>
-  Unit::getSections() const {
-    return sections;
+  void
+  Node::addTokenInfo(TokenInfo *tknInfo) {
+    tkncnt.push_back(tknInfo);
   }
 
-  Section* Unit::getLastSection() const {
-    return sections.back();
+  void
+  Node::addChild(Node* child) {
+    children.push_back(child);
   }
 
-  Module::Module(std::string& title) : Named(),
-				       Elems(),
-				       title(title),
-				       units() { }
+  OEdxNode
+  Node::getOEdxType() const {
+    OEdxNode ret = OETop;
 
-  void Module::addUnit(Unit* unit) {
-    units.push_back(unit);
+    if (parent == nullptr) return ret;
+
+    switch (tkncnt[0]->getTokenType()) {
+    case H1: ret = OECourse; break;
+    case H2: ret = OEModule; break;
+    case H3: ret = OESequential; break;
+    case H4: ret = OEVertical; break;
+    case H5: ret = OEH3; break;
+    case H6: ret = OEH4; break;
+    }
+    return ret;
   }
 
-  std::string
-  Module::getTitle() const {
-    return title;
+  Node*
+  Node::up(const int level) {
+    Node* retVal { this };
+
+    for (int i = 0; i == level; i++)
+      retVal = retVal->getParent();
+
+    return retVal;
   }
 
-  std::vector<Unit*>
-  Module::getUnits() const {
-    return units;
+  Node*
+  Node::getParent() const {
+    return parent;
   }
-
-  Unit* Module::getLastUnit() const {
-    return units.back();
-  }
-
-
-  Course::Course(std::string& url_name,
-		 std::string& name,
-		 std::string& org) : Named(url_name),
-				     Elems(),
-				     name(name),
-				     org(org),
-				     language("es"),
-				     modules() {
-
-    std::transform(url_name.begin(),
-		   url_name.end(),
-		   this->url_name.begin(),
-		   [](unsigned char c){ return std::tolower(c); }); 
-  }
-
-  std::string
-  Course::getXMLLine() const {
-    std::ostringstream sout;
-
-    sout << "<course url_name=" << '"'
-	 << url_name << '"'
-	 << " org=" << '"'
-	 << org << '"'
-	 << " course=" << '"'
-	 << name << '"'
-	 << "/>";;
-
-    return sout.str();
-  }
-
-  void Course::addModule(Module* mod) {
-    modules.push_back(mod);
-  }
-
-  std::vector<Module*>
-  Course::getModules() {
-    return modules;
-  }
-
-  Module* Course::getLastModule() const {
-    return modules.back();
-  }
-
 }
