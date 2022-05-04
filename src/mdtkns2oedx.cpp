@@ -42,140 +42,14 @@ getText2TknContent(std::vector<TokenContent*>* vTknCnt) {
 		});
   return strs;
 }
-//
-
-// oedx::Course*
-// processTokens(const std::vector<TokenInfo*>* vec) {
-//   oedx::Course* pCourse = nullptr;
-//   std::stack<oedx::Elems*> sElems;
-
-//   std::for_each(vec->begin(), vec->end(),
-// 		[&pCourse,&sElems](TokenInfo* pTknInf) {
-//       switch(pTknInf->getTokenType()) {
-//       case H1:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::istringstream sstr((*vstrs)[0]);
-// 	  std::string name;
-// 	  std::string url_name;
-// 	  std::string org { "S4N" };
-// 	  std::getline(sstr, name, '.');
-// 	  std::getline(sstr, url_name);
-// 	  pCourse = new oedx::Course(trim(name), trim(url_name), org);
-// 	  if (sElems.empty())
-// 	    sElems.push(pCourse);
-// 	  else
-// 	    ;
-// 	  delete vstrs;
-// 	}
-// 	break;
-
-//       case H2:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::string title { (*vstrs)[0] };
-// 	  oedx::Module *pModule = new oedx::Module(title);
-// 	  pCourse
-// 	    ->addModule(pModule);
-
-// 	  for (int i = sElems.size(); i >= H2 - H1; i--) sElems.pop();
-
-// 	  sElems.push(pModule);
-// 	}
-// 	break;
-
-//       case H3:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::string title { (*vstrs)[0] };
-// 	  oedx::Unit *pUnit = new oedx::Unit(title);
-// 	  pCourse
-// 	    ->getLastModule()
-// 	    ->addUnit(pUnit);
-
-// 	  for (int i = sElems.size(); i >= H3 - H1; i--) sElems.pop();
-
-// 	  sElems.push(pUnit);
-// 	}
-// 	break;
-
-//       case H4:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::string title { (*vstrs)[0] };
-// 	  oedx::Section *pSection = new oedx::Section(title);
-// 	  std::cout << title << std::endl;
-// 	  pCourse
-// 	    ->getLastModule()
-// 	    ->getLastUnit()
-// 	    ->addSection(pSection);
-
-// 	  for (int i = sElems.size(); i >= H4 - H1; i--) sElems.pop();
-
-// 	  sElems.push(pSection);
-// 	}
-// 	break;
-
-//       case H5:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::string title { (*vstrs)[0] };
-// 	  oedx::Chapter *pChapter = new oedx::Chapter(title);
-// 	  pCourse
-// 	    ->getLastModule()
-// 	    ->getLastUnit()
-// 	    ->getLastSection()
-// 	    ->addChapter(pChapter);
-
-// 	  for (int i = sElems.size(); i >= H5 - H1; i--) sElems.pop();
-
-// 	  sElems.push(pChapter);
-// 	}
-// 	break;
-
-//       case H6:
-// 	{
-// 	  std::vector<std::string>* vstrs = getText2TknContent(pTknInf->getContent());
-// 	  std::string title { (*vstrs)[0] };
-// 	  oedx::SubChapter *pSubChapter = new oedx::SubChapter(title);
-// 	  pCourse->getLastModule()
-// 	    ->getLastUnit()
-// 	    ->getLastSection()
-// 	    ->getLastChapter()
-// 	    ->addSubChapter(pSubChapter);
-
-// 	  for (int i = sElems.size(); i >= H5 - H1; i--) sElems.pop();
-
-// 	  sElems.push(pSubChapter);
-// 	}
-// 	break;
-
-//       case TEXT:
-// 	{
-// 	  std::string body {"<p>"};
-// 	  std::for_each(pTknInf->getContent()->begin(),
-// 			pTknInf->getContent()->end(),
-// 			[&body](const TokenContent* tkncnt) {
-// 			  body += tkncnt->getHtmlText();
-// 			});
-// 	  body += "</p><br/>";
-
-// 	  oedx::Html *pHtml = new oedx::Html(body);
-// 	  sElems.top()->addElem(pHtml);
-// 	}
-// 	break;
-//       }
-//     });
-
-//   return pCourse;
-// }
 
 void
 addOEdxNode(TokenInfo *pTknInfo,
 	    oedx::Node** curNode,
 	    int upLevel,
 	    std::string ref = "") {
-  oedx::Node* parent = (*curNode)->up(0);
+
+  oedx::Node* parent = (*curNode)->up(upLevel);
   oedx::Node* node = nullptr;
 
   if (ref.size() != 0) {
@@ -191,25 +65,40 @@ addOEdxNode(TokenInfo *pTknInfo,
 }
 
 oedx::Node*
-processTokens(const std::vector<TokenInfo*>* vec) {
+processTokens(std::string& courseName,
+	      const std::vector<TokenInfo*>* vec) {
   oedx::Node* topNode = new oedx::Node();
   oedx::Node* curNode = topNode;
-  // std::vector<TokenInfo*>::iterator
-  for (auto  it =  vec->begin();
+
+  for (auto  it = vec->begin();
        it != vec->end();
        ++it) {
+
+
     oedx::OEdxNode curTknType = curNode->getOEdxType();
     TokenType tknType = (*it)->getTokenType();
+
     switch(curTknType) {
     case oedx::OETop:
       {
-	if (tknType == H1) {
-	  addOEdxNode((*it), &curNode, 0, "Scala_02");
-	}
-	else {
-	  std::cerr << "Error processTokens2: You only add H1 token to OETop"
+	switch(tknType) {
+	case H1:
+	  addOEdxNode((*it), &curNode, 0, courseName);
+         break;
+	case H2:
+	case H3:
+	case H4:
+	case H5:
+	case H6:
+	  std::cerr << "Error process tokens: You only add H1 token to OETop"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
+	  break;
+	default:
+	  curNode->addTokenInfo((*it));
+	  break;
 	}
       }
       break;
@@ -218,7 +107,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
       {
 	switch(tknType) {
 	case H1:
-	  std::cerr << "Error processTokens2: You cannot add another course"
+	  std::cerr << "Error process tokens: You cannot add another course"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -229,7 +120,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	case H4:
 	case H5:
 	case H6:
-	  std::cerr << "Error processTokens2: You are not added a Module"
+	  std::cerr << "Error process tokens: You are not added a Module"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -244,7 +137,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
       {
 	switch(tknType) {
 	case H1:
-	  std::cerr << "Error processTokens2: You cannot add another course"
+	  std::cerr << "Error process tokens: You cannot add another course"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -257,7 +152,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	case H4:
 	case H5:
 	case H6:
-	  std::cerr << "Error processTokens2: You are not added a Sequence"
+	  std::cerr << "Error process tokens: You are not added a Sequence"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -273,7 +170,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	switch(tknType) {
 	case H1:
 	  {
-	    std::cerr << "Error processTokens2: You cannot add another course"
+	    std::cerr << "Error process tokens: You cannot add another course"
+		      << " "
+		      << (*it)->getLine()
 		      << std::endl;
 	    return nullptr;
 	  }
@@ -289,7 +188,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	  break;
 	case H5:
 	case H6:
-	  std::cerr << "Error processTokens2: You are not added a Module Sequence"
+	  std::cerr << "Error process tokens: You are not added a Module Sequence"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -304,7 +205,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
       {
 	switch(tknType) {
 	case H1:
-	  std::cerr << "Error processTokens2: You cannot add another course"
+	  std::cerr << "Error process tokens: You cannot add another course"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -321,7 +224,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
 	  addOEdxNode((*it), &curNode, 0);
 	  break;
 	case H6:
-	  std::cerr << "Error processTokens2: You are not added a up level before"
+	  std::cerr << "Error process tokens: You are not added a up level before"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -336,7 +241,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
       {
 	switch(tknType) {
 	case H1:
-	  std::cerr << "Error processTokens2: You cannot add another course"
+	  std::cerr << "Error process tokens: You cannot add another course"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;
@@ -366,7 +273,9 @@ processTokens(const std::vector<TokenInfo*>* vec) {
       {
 	switch(tknType) {
 	case H1:
-	  std::cerr << "Error processTokens2: You cannot add another course"
+	  std::cerr << "Error process tokens: You cannot add another course"
+		    << " "
+		    << (*it)->getLine()
 		    << std::endl;
 	  return nullptr;
 	  break;

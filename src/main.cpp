@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+#include <filesystem>
 #include <xercesc/util/PlatformUtils.hpp>
 #include "oedx.h"
 
@@ -33,31 +34,6 @@ static void version(const char* progname) {
   exit(EXIT_SUCCESS);
 }
 
-// static void printElems(std::vector<oedx::Elem*>& elems) {
-//   std::for_each(elems.begin(),
-// 		elems.end(),
-// 		[](const oedx::Elem* elem) {
-// 		  std::cout << elem->getText() << std::endl;
-// 		});
-// }
-
-// oedx::Course*
-// createCourse(TokenInfo *currTkn) {
-//   std::vector<TokenContent*> *vec_cont = currTkn->getContent();
-//   std::istringstream ist((*vec_cont)[0]->getText());
-//   std::string url_name, name, org;
-
-//   char del { '.' };
-
-//   getline(ist, url_name, del);
-//   getline(ist, name, del);
-//   getline(ist, org);
-
-//   name = name.substr(1);
-//   org = org.substr(1);
-
-//   return new oedx::Course(url_name, name, org);
-// }
 
 int
 main(int argc, char **argv) {
@@ -84,80 +60,53 @@ main(int argc, char **argv) {
     }
   }
 
-  oedx::Node *root = nullptr;
+  oedx::Node* root;
 
-  for (int i = optind; i < argc; ++i) {
-    FILE *fd = nullptr;
-    std::vector<TokenInfo*>* vec = nullptr;
-
-    if (::strcmp(argv[i], "-") != 0)
-      fd = ::fopen(argv[i], "r");
-    else
-      fd = ::stdin;
-
-    if (fd == nullptr) {
-      std::cerr << "Could't open "
-		<< argv[i] << std::endl;
-    }
-    else {
-      vec = processInput(fd);
-      fclose(fd);
-
-      root = processTokens(vec);
-    }
+  if (!(argc == optind + 1)) {
+    std::cerr << "Only process one course at time" << std::endl;
+    return EXIT_FAILURE;
   }
 
-  // std::cout << course->getXMLLine() << std::endl;
+  // for (int i = optind; i < argc; ++i) {
+  FILE *fd = nullptr;
+  std::vector<TokenInfo*>* vec = nullptr;
 
-  // std::vector<oedx::Module*> vMod = course->getModules();
-  // printElems(course->getElems());
+  fd = ::fopen(argv[optind], "r");
+  std::filesystem::path filePath { argv[optind] };
+  std::filesystem::path projectDir { filePath.parent_path() };
+  std::filesystem::path fileName { filePath.stem() };
+  std::string strFileName { fileName.string() };
 
-  // std::for_each(vMod.begin(),
-  // 		vMod.end(),
-  // 		[](oedx::Module* mod) {
-  // 		  printElems(mod->getElems());
-  // 		  std::cout << "Module: " << mod->getTitle()
-  // 			    << " " << mod->getUrlName()
-  // 			    << std::endl;
-  // 		  std::vector<oedx::Unit*> vUnit = mod->getUnits();
-  // 		  std::for_each(vUnit.begin(),
-  // 				vUnit.end(),
-  // 				[](oedx::Unit* unit) {
-  // 				  printElems(unit->getElems());
-  // 				  std::cout << "Unit: " << unit->getTitle()
-  // 					    << " " << unit->getUrlName()
-  // 					    << std::endl;
-  // 				  std::vector<oedx::Section*> vSection = unit->getSections();
-  // 				  std::for_each(vSection.begin(),
-  // 						vSection.end(),
-  // 						[](oedx::Section* sec) {
-  // 						  printElems(sec->getElems());
-  // 						  std::cout << "Section: " << sec->getTitle()
-  // 							    << " " << sec->getUrlName()
-  // 							    << std::endl;
-  // 						  std::vector<oedx::Chapter*> vChapter = sec->getChapters();
-  // 						  std::for_each(vChapter.begin(),
-  // 								vChapter.end(),
-  // 								[](oedx::Chapter* chap) {
-  // 								  printElems(chap->getElems());
-  // 								  std::cout << "Chapter: " << chap->getTitle()
-  // 									    << " " << chap->getUrlName()
-  // 									    << std::endl;
-  // 								  std::vector<oedx::SubChapter*> vSubChapter = chap->getSubChapters();
-  // 								  std::for_each(vSubChapter.begin(),
-  // 										vSubChapter.end(),
-  // 										[](oedx::SubChapter* subChap) {
-  // 										  printElems(subChap->getElems());
-  // 										  std::cout << "SubChapter: " << subChap->getTitle()
-  // 											    << " " << subChap->getUrlName()
-  // 											    << std::endl;
-  // 										});
-  // 								});
-  // 						});
-  // 				});
-  // 		});
+  std::cout << "Project directory: " << projectDir << std::endl;
+  std::cout << "Filename: " << fileName << std::endl;
+
+
+  if (fd == nullptr) {
+    std::cerr << "Could't open "
+	      << argv[optind] << std::endl;
+    return EXIT_FAILURE;
+  }
+
+
+  vec = processInput(fd);
+  fclose(fd);
+
+  root = processTokens(strFileName, vec);
+
+  std::filesystem::path originDir { std::filesystem::current_path() };
+
+  std::filesystem::current_path(projectDir);
+
+  std::string wd { oedx::createPopulateWorkDir() };
+
+  std::cout << "New Directory: "
+	    << wd
+	    << std::endl;
+
+  std::filesystem::current_path(originDir);
 
   xercesc::XMLPlatformUtils::Terminate();
 
   return EXIT_SUCCESS;
 }
+

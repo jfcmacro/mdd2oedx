@@ -3,6 +3,7 @@
 #include <cctype>
 #include <sstream>
 #include <uuid++.hh>
+#include <filesystem>
 
 namespace oedx {
 
@@ -107,7 +108,7 @@ namespace oedx {
   Node::up(const int level) {
     Node* retVal { this };
 
-    for (int i = 0; i == level; i++)
+    for (int i = 0; i < level; i++)
       retVal = retVal->getParent();
 
     return retVal;
@@ -117,4 +118,36 @@ namespace oedx {
   Node::getParent() const {
     return parent;
   }
+
+  std::string
+  createPopulateWorkDir() {
+    uuid id;
+
+    id.make(UUID_MAKE_V1);
+    std::string strWorkDir { "." };
+
+    strWorkDir += id.string();
+
+    std::filesystem::path wd { strWorkDir };
+    std::filesystem::path thisWD { std::filesystem::current_path() };
+    std::filesystem::create_directory(wd);
+    std::filesystem::current_path(wd);
+    std::filesystem::path mainCourse { "course" };
+    std::filesystem::create_directory(mainCourse);
+    std::filesystem::current_path(mainCourse);
+    std::filesystem::path aboutD { "about" };
+    std::filesystem::create_directory(aboutD);
+    std::filesystem::path assestD { "assets" };
+    std::filesystem::create_directory(assestD);
+    std::filesystem::path courseD { "course" };
+    std::filesystem::create_directory(courseD);
+    std::filesystem::path infoD { "info" };
+    std::filesystem::create_directory(infoD);
+    std::filesystem::path policies { "policies" };
+    std::filesystem::create_directory(policies);
+    std::filesystem::current_path(thisWD);
+
+    return strWorkDir;
+  }
+
 }

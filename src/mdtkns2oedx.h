@@ -2,5 +2,4 @@
 #include "oedx.h"
 #include "mdtokens.h"
 
-// oedx::Course* processTokens(const std::vector<TokenInfo*>* vec);
-oedx::Node* processTokens(const std::vector<TokenInfo*>* vec);
+oedx::Node* processTokens(std::string& courseName, const std::vector<TokenInfo*>* vec);

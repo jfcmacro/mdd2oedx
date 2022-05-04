@@ -30,4 +30,6 @@ namespace oedx {
     Node* up(const int level);
     Node* getParent() const;
   };
+
+  std::string createPopulateWorkDir();
 }
