@@ -1,5 +1,7 @@
 bin_PROGRAMS = mdd2oedx
 
-mdd2oedx_SOURCES = main.cpp
+AM_LFLAGS = --header-file=mdlexer.h
+mdd2oedx_LDFLAGS = -lossp-uuid++ -lxerces-c
+mdd2oedx_SOURCES = main.cpp mdlexer.lpp mdtokens.h mdtokens.cpp oedx.cpp oedx.h mdtkns2oedx.cpp mdtkns2oedx.h
 
 

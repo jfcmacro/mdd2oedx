@@ -1,0 +1,184 @@
+%{
+#include <cstring>
+#include <iostream>
+#include <iterator>
+#include <regex>
+#include <tuple>
+#include "mdtokens.h"
+%}
+%option noyywrap yylineno
+%x ITEXT
+%x LABELTXT
+%{
+enum LableState { OUTLABEL, INLABEL, NEXTOUT } lblState = OUTLABEL;
+
+static std::string getRid1S1E(std::string& str) {
+   return str.substr(1,str.size()-2);
+}
+
+static std::string getRid2S2E(std::string& str) {
+   return str.substr(2,str.size()-4);
+}
+
+static std::tuple<std::string,std::string> divLink(std::string &str) {
+   std::string first;
+   std::string second;
+   std::tuple<std::string, std::string> ret(first, second);
+   return ret;
+}
+%}
+%%
+
+^#{1,6}[ ]             {
+                         TokenType tknType = H1;
+                         switch(yyleng - 1) {
+		         case 1: tknType = H1; break;
+		         case 2: tknType = H2; break;
+		         case 3: tknType = H3; break;
+		         case 4: tknType = H4; break;
+		         case 5: tknType = H5; break;
+		         case 6: tknType = H6; break;
+		         }
+                         TokenInfo::createCurrTkn(tknType,yylineno);
+                         BEGIN ITEXT;
+                       }
+(^(\*|\+|-)[ ])    {
+                      TokenInfo::createCurrTkn(ITEM, yylineno);
+                      BEGIN ITEXT;
+		    }
+^[0-9]+\.[ ]           {
+                         TokenInfo::createCurrTkn(ENUM, yylineno);
+                         BEGIN ITEXT;
+		       }
+^>[ ]                  {
+                         TokenInfo::createCurrTkn(BLOCK, yylineno);
+                         BEGIN ITEXT;
+		       }
+^\([ ]\)[ ]            {
+                         TokenInfo::createCurrTkn(ONE_CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
+^\([xX]\)[ ]           {
+                         TokenInfo::createCurrTkn(SELECTED_ONE_CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
+^\[[ ]\][ ]            {
+                         TokenInfo::createCurrTkn(MULT_CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
+^\[[xX]\][ ]           {
+                         TokenInfo::createCurrTkn(SELECTED_MULT_CHOICE, yylineno);
+                         BEGIN ITEXT;
+                       }
+^>>                    {
+                         TokenInfo::createCurrTkn(LABEL, yylineno);
+		         lblState = INLABEL;
+                         BEGIN LABELTXT;
+                       }
+<ITEXT>{
+\*[^*]+\* |
+_[^_]+_                {
+		         TokenContent* tc = new TokenContentEmph();
+		         std::string text(yytext);
+			 // text = text.substr(1,text.size()-2);
+			 text = getRid1S1E(text);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+\*\*[^*]+\*\* |
+__[^_]+__              {
+		         TokenContent* tc = new TokenContentStrong();
+		         std::string text(yytext);
+			 text = getRid2S2E(text);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+~~[^\~]+~~             {
+                         TokenContent* tc = new TokenContentDel();
+		         std::string text(yytext);
+			 text = getRid2S2E(text);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+`[^`]`                 {
+		         TokenContent* tc = new TokenContentCode();
+		         std::string text(yytext);
+		         tc->setText(text);
+		         TokenInfo::getCurrTkn()->addTknContent(tc);
+                       }
+\[(.|[^\]]*)\]\([^\)]+\) {
+		            std::string text(yytext);
+		            TokenContent* tc = new TokenContentLink(text, text);
+		            TokenInfo::getCurrTkn()->addTknContent(tc);
+		         }
+\!\[(.|[^\]]*)\]\([^\)]+\) {
+		              TokenContent* tc = new TokenContentImage();
+		              std::string text(yytext);
+		              tc->setText(text);
+		              TokenInfo::getCurrTkn()->addTknContent(tc);
+		           }
+.                      {
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+\n                     {
+                         BEGIN INITIAL;
+		         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
+}
+<LABELTXT>{
+\<\<$                  {
+                         lblState = NEXTOUT;
+                       }
+.                      {
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+\n                     {
+                         if (lblState != NEXTOUT) {
+		            std::cerr << "Label doesn't end with << at line: "
+			              << yylineno << std::endl;
+		            yyterminate();
+	                 }
+                         BEGIN INITIAL;
+		         lblState = OUTLABEL;
+		         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
+}
+.                      {
+                         BEGIN ITEXT;
+                         TokenInfo* currTkn = TokenInfo::getCurrTkn();
+			 if (currTkn == nullptr) {
+			    TokenInfo::createCurrTkn(TEXT,yylineno);
+			    currTkn = TokenInfo::getCurrTkn();
+			 }
+		         TokenContent* lastText = currTkn->getLastContent();
+		         if (lastText == nullptr) {
+		            lastText = new TokenContentText();
+		            currTkn->addTknContent(lastText);
+		         }
+		         lastText->setText(*yytext);
+                       }
+[ \t]+\n               {
+                          TokenInfo::createCurrTkn(BLANK_LINE, yylineno);
+			  return TokenInfo::getCurrTkn()->getTokenType();
+                       }
+<<EOF>>                {
+                         return TKEOF;
+                       }
+\n                     {
+                         if (TokenInfo::getCurrTkn() == nullptr)
+			    TokenInfo::createCurrTkn(BLANK_LINE, yylineno);
+                         return TokenInfo::getCurrTkn()->getTokenType();
+                       }
+%%
